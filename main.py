@@ -1,11 +1,6 @@
 # Script with Standard Approach and LOSO Appraoch
 
-%load_ext autoreload
-%autoreload 2
-
 import pdb
-%pdb on
-
 import os
 import pathlib
 from typing import List, Tuple, Optional
@@ -200,9 +195,10 @@ def experiments(subjects: List[int] = SUBJECTS,
             # ----------------------------
             # STANDARD PCA synergies
             # ----------------------------
-            # NOTE: your standard_pca expects features x samples, you used .T originally
+            #standard_pca expects features x samples 
             synergy_matrix_pca, num_synergies_pca, U_pca, _, _ = standard_pca(training_data_corrupt.T)
-            # Keep convention: synergies as rows
+            
+            # synergies as rows
             S_pca = U_pca.T[:num_synergies_pca]  # (m_pca, D)
 
             # ----------------------------
@@ -315,7 +311,7 @@ def experiments(subjects: List[int] = SUBJECTS,
         print(f"Per-subject metrics appended to {os.path.basename(detail_path)}")
 
         # ----------------------------
-        # Write per-fraction summary so far (overwrite for clarity)
+        # Write per-fraction summary so far 
         # ----------------------------
         summary_df = pd.DataFrame(summary_rows)
         summary_df.to_csv(summary_path, index=False)
@@ -364,7 +360,6 @@ def _load_subject_train_test(subject_id: int) -> Tuple[np.ndarray, np.ndarray, s
     
     # Training CSV
     training_csv = os.path.join(base_path, subj_folder, "ang_vel_mat.csv")
-    # training_df = pd.read_csv(training_csv)
     
     # print(f"[DEBUG] Loading training CSV for subject {subject_id}: {training_csv}")
     training_df = _safe_read_csv(training_csv)
@@ -391,7 +386,7 @@ def loso_experiments(subjects: List[int] = SUBJECTS,
         - Corrupt TEST subject Natural test data for input; use clean Natural data as ground truth.
         - Evaluate LASSO vs Robust model, accumulate per-fold/per-fraction metrics.
 
-    Output files mirror your experiments():
+    Output files mirror experiments():
       - Per-fold detail CSV (rows = (test_subject, fraction, metrics))
       - Per-fraction summary CSV (mean±std across held-out subjects)
     """
@@ -429,21 +424,21 @@ def loso_experiments(subjects: List[int] = SUBJECTS,
             # Build train/test splits at the SUBJECT level
             train_subjects = [s for s in subjects if s != test_subject]
 
-            # ---- Load & stack TRAIN (Rapid) for all train_subjects ----
+            # ---- Load & stack TRAIN for all train_subjects ----
             train_mats = []
             for s in train_subjects:
                 trn, _, _ = _load_subject_train_test(s)
                 train_mats.append(trn)
             X_train = np.vstack(train_mats)  # (N_train_tasks_total, D_train)
 
-            # ---- Load TEST (Natural) for the held-out subject ----
+            # ---- Load TEST for the held-out subject ----
             _, X_test_clean, subj_folder = _load_subject_train_test(test_subject)
 
             # ---- Inject corruption per fold ----
             fold_seed = np.random.randint(0, 1e6)
 
             if outlier_type == "Rapid":
-                # corrupt TRAIN (Rapid pool) and TEST (Natural) for input
+                # corrupt TRAIN and TEST for input
                 X_train_corrupt = generate_outliers(
                     X_train, frac, low_mag=2, high_mag=4, mode='relative', seed=fold_seed
                 )
@@ -476,7 +471,7 @@ def loso_experiments(subjects: List[int] = SUBJECTS,
             B_pca  = shift_synergies(S_pca[:k])
             B_rpca = shift_synergies(S_rpca)
 
-            # (Optional) save synergies per fold/test_subject
+            # save synergies per fold/test_subject
             pca_dir  = make_synergy_dir(output_folder, "PCA_LOSO",  outlier_type, occ_type if outlier_type == "Occlusion" else None)
             rpca_dir = make_synergy_dir(output_folder, "RPCA_LOSO", outlier_type, occ_type if outlier_type == "Occlusion" else None)
             save_synergies(S_pca,  pca_dir,  test_subject, frac)
@@ -485,8 +480,7 @@ def loso_experiments(subjects: List[int] = SUBJECTS,
             # ---- Evaluate on held-out subject ----
             # (B, X_corrupted_input, k, X_clean_ground_truth)
             avg_error_l, C_l, avg_nrmse_l = run_lasso_ls_model(B_pca,  X_test_input, k, X_test_clean)
-            avg_error_r, C_r, _, avg_nrmse_r = run_new_model     (B_rpca, X_test_input, k, X_test_clean)
-
+            avg_error_r, C_r, _, avg_nrmse_r = run_new_model(B_rpca, X_test_input, k, X_test_clean)
 
             # displaying results
             print(f"[LOSO] Test subj {test_subject:>2}: ")
@@ -495,9 +489,7 @@ def loso_experiments(subjects: List[int] = SUBJECTS,
 
             # Similarity diagnostics (optional): compare top-k PCs from PCA vs RPCA
             dir_align, vec_diff = compute_similarity(S_pca, S_rpca, k_compare=TOP_K_COMPARE)
-            # dir_align = pad_k(dir_align, TOP_K_COMPARE)
-            # vec_diff  = pad_k(vec_diff,  TOP_K_COMPARE)
-
+        
             # Collect per-fold rows
             detail_rows_this_frac.append({
                 'test_subject': test_subject,
@@ -536,7 +528,7 @@ def loso_experiments(subjects: List[int] = SUBJECTS,
 
         # print(f"\n[LOSO] Finished fraction {frac:.2%} → LASSO: {mean_l:.4f} ± {std_l:.4f} | Robust: {mean_r:.4f} ± {std_r:.4f}\n")
 
-        # Append per-fold details to CSV (append mode)
+        # Append per-fold details to CSV
         detail_df = pd.DataFrame(detail_rows_this_frac)
         if os.path.exists(detail_path):
             detail_df.to_csv(detail_path, mode='a', header=False, index=False)
