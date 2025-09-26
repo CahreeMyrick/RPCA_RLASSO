@@ -31,8 +31,8 @@ SUBJECTS: List[int] = [1, 2, 4, 5, 6, 7, 8, 9, 10] # subject 3 not included, the
 OUTLIER_FRACTIONS: List[float] = [0.0, 0.05, 0.10, 0.15, 0.20]
 OCCLUSION_TYPES = ['mild', 'joint', 'severe']
 
-base_path      = '/Users/cahree/desktop/Regression/Pitt Cyberglove Data/Rapid Natural and ASL tasks/'
-test_root      = '/Users/cahree/desktop/Regression/Pitt Cyberglove Data/Rapid Natural and ASL tasks/'
+base_path      = '/Users/cahree/desktop/Regression/xxxxxxxxxxxxxx/Rapid Natural and ASL tasks/'
+test_root      = '/Users/cahree/desktop/Regression/xxxxxxxxxxxxxx/Rapid Natural and ASL tasks/'
 output_folder  = '/Users/cahree/desktop/RPCARLASSO_RESULTS'
 pathlib.Path(output_folder).mkdir(parents=True, exist_ok=True)
 
