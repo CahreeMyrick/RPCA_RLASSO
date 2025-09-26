@@ -28,7 +28,7 @@ def load_subj1_training_data():
     A 2d numpy array
     
     """
-    path = '/Users/cahree/desktop/Regression/Pitt Cyberglove Data/Rapid Natural and ASL tasks/subj1/ang_vel_mat.csv'
+    path = '/Users/cahree/desktop/Regression/xxxxxxxxxxxx/Rapid Natural and ASL tasks/subj1/ang_vel_mat.csv'
     data = pd.read_csv(path, header=None)
     data_values = data.to_numpy()
     return data_values
@@ -47,7 +47,7 @@ def load_subj1_test_data():
 
     """
     
-    path = path = '/Users/cahree/desktop/Regression/Pitt Cyberglove Data/Rapid Natural and ASL tasks/subj1/Natural_Test_Data.mat'
+    path = path = '/Users/cahree/desktop/Regression/xxxxxxxxxxxxx/Rapid Natural and ASL tasks/subj1/Natural_Test_Data.mat'
     data = loadmat(path)
     data_array = data['testdata']
 
